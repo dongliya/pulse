@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}{{ text.nav_report_management }} | Pulse{% endblock %}
+{% block content %}
+<section class="hero compact management-hero">
+  <div>
+    <p class="eyebrow">{{ text.nav_report_management }}</p>
+    <h1 class="hero-title">{{ text.report_management_title }}</h1>
+    <p class="lede">{{ text.report_management_subtitle }}</p>
+  </div>
+</section>
+
+<section class="panel-grid management-grid">
+  <article class="panel form-panel-inline">
+    <div class="panel-head">
+      <h2>{{ text.create_report }}</h2>
+      <span>{{ project_options|length }} {{ text.projects }}</span>
+    </div>
+    {% if error %}
+    <p class="error-banner">{{ error }}</p>
+    {% endif %}
+    <form class="report-form" method="post" action="/activities/manage?lang={{ lang }}">
+      <label>
+        <span>{{ text.member }}</span>
+        <select name="member" required>
+          <option value="">{{ text.select_member }}</option>
+          {% for item in user_options %}
+          <option value="{{ item.name }}" {% if form_data.get('member') == item.name %}selected{% endif %}>{{ item.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>{{ text.project }}</span>
+        <select name="project" required>
+          <option value="">{{ text.all_projects }}</option>
+          {% for item in project_options %}
+          <option value="{{ item.name }}" {% if form_data.get('project') == item.name %}selected{% endif %}>{{ item.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="full">
+        <span>{{ text.title }}</span>
+        <input name="title" value="{{ form_data.get('title', '') }}" required />
+      </label>
+      <label>
+        <span>{{ text.type }}</span>
+        <select name="type">
+          {% for item in types %}
+          <option value="{{ item }}" {% if form_data.get('type') == item %}selected{% endif %}>{{ type_labels[item] }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>{{ text.status }}</span>
+        <select name="status">
+          {% for item in statuses %}
+          <option value="{{ item }}" {% if form_data.get('status') == item %}selected{% endif %}>{{ status_labels[item] }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="full">
+        <span>{{ text.progress_note }}</span>
+        <textarea name="progress_note" rows="3">{{ form_data.get('progress_note', '') }}</textarea>
+      </label>
+      <label>
+        <span>{{ text.report_date }}</span>
+        <input type="date" name="report_date" value="{{ form_data.get('report_date', today) }}" required />
+      </label>
+      <label class="full">
+        <span>{{ text.risk }}</span>
+        <textarea name="risk" rows="3">{{ form_data.get('risk', '') }}</textarea>
+      </label>
+      <label class="full">
+        <span>{{ text.next_plan }}</span>
+        <textarea name="next_plan" rows="4">{{ form_data.get('next_plan', '') }}</textarea>
+      </label>
+      <div class="form-actions full">
+        <button class="button-primary" type="submit">{{ text.submit_report }}</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel">
+    <div class="panel-head wrap-head">
+      <div>
+        <h2>{{ text.report_count_label }}</h2>
+        <span>{{ report_count }} {{ text["items"] }}</span>
+      </div>
+      <form class="filter-form" method="get" action="/activities/manage">
+        <input type="hidden" name="lang" value="{{ lang }}" />
+        <label>
+          <span>{{ text.filter_project }}</span>
+          <select name="project" onchange="this.form.submit()">
+            <option value="">{{ text.all_projects }}</option>
+            {% for item in project_options %}
+            <option value="{{ item.name }}" {% if selected_project == item.name %}selected{% endif %}>{{ item.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </form>
+    </div>
+    <div class="management-list">
+      {% for report in reports %}
+      <div class="management-row">
+        <div class="management-main">
+          <div class="project-title-row">
+            <strong>{{ report.title }}</strong>
+            <span class="status-pill">{{ status_labels[report.status.value] }}</span>
+          </div>
+          <p>{{ report.project }} · {{ report.member }} · {{ type_labels[report.type.value] }}</p>
+          <p>{{ text.progress }}: {{ report.progress }}%</p>
+          <p>{{ text.activity_status_changed_at }}: {{ report.status_changed_at.strftime('%Y-%m-%d %H:%M') if report.status_changed_at else '-' }}</p>
+          {% if report.progress_note %}<p><strong>{{ text.progress_note }}:</strong> {{ report.progress_note }}</p>{% endif %}
+          {% if report.risk %}<p><strong>{{ text.risk_label }}:</strong> {{ report.risk }}</p>{% endif %}
+          {% if report.next_plan %}<p><strong>{{ text.next_label }}:</strong> {{ report.next_plan }}</p>{% endif %}
+        </div>
+        <div class="management-actions">
+          {% if report.status.value == "done" %}
+          <div class="progress-form progress-form-readonly">
+            <label>
+              <span>{{ text.progress }}</span>
+              <input type="number" value="100" disabled />
+            </label>
+            {% if report.progress_note %}
+            <label>
+              <span>{{ text.progress_note }}</span>
+              <textarea rows="3" disabled>{{ report.progress_note }}</textarea>
+            </label>
+            {% endif %}
+          </div>
+          {% else %}
+          <form method="post" action="/activities/{{ report.id }}/progress?lang={{ lang }}" class="progress-form">
+            <label>
+              <span>{{ text.progress }}</span>
+              <input type="number" name="progress" min="0" max="100" step="10" value="{{ report.progress }}" required />
+            </label>
+            <label>
+              <span>{{ text.progress_note }}</span>
+              <textarea name="progress_note" rows="3">{{ report.progress_note or '' }}</textarea>
+            </label>
+            <button class="button-secondary compact" type="submit">{{ text.update_progress }}</button>
+          </form>
+          {% endif %}
+          <form method="post" action="/activities/{{ report.id }}/status?lang={{ lang }}" class="status-form">
+            <select name="status" class="status-select">
+              {% for item in statuses %}
+              <option value="{{ item }}" {% if report.status.value == item %}selected{% endif %}>{{ status_labels[item] }}</option>
+              {% endfor %}
+            </select>
+            <button class="button-secondary compact" type="submit">{{ text.update_status }}</button>
+          </form>
+          <form method="post" action="/activities/{{ report.id }}/delete?lang={{ lang }}" class="delete-form">
+            <button class="button-danger" type="submit">{{ text.delete }}</button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <p class="empty">{{ text.empty_reports }}</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

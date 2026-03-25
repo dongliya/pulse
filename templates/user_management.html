@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}{{ text.nav_user_management }} | Pulse{% endblock %}
+{% block content %}
+<section class="hero compact management-hero">
+  <div>
+    <p class="eyebrow">{{ text.nav_user_management }}</p>
+    <h1 class="hero-title">{{ text.user_management_title }}</h1>
+    <p class="lede">{{ text.user_management_subtitle }}</p>
+  </div>
+</section>
+
+<section class="panel-grid management-grid">
+  <article class="panel form-panel-inline">
+    <div class="panel-head">
+      <h2>{{ text.create_user }}</h2>
+      <span>{{ users|length }} {{ text.members }}</span>
+    </div>
+    {% if error %}
+    <p class="error-banner">{{ error }}</p>
+    {% endif %}
+    <form class="report-form" method="post" action="/users/manage?lang={{ lang }}">
+      <label>
+        <span>{{ text.user_name }}</span>
+        <input name="name" value="{{ user_form.get('name', '') }}" required />
+      </label>
+      <label>
+        <span>{{ text.user_email }}</span>
+        <input name="email" value="{{ user_form.get('email', '') }}" />
+      </label>
+      <label>
+        <span>{{ text.user_role }}</span>
+        <select name="role">
+          {% for item in user_roles %}
+          <option value="{{ item }}" {% if user_form.get('role', 'engineer') == item %}selected{% endif %}>{{ user_role_labels[item] }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <div class="form-actions full">
+        <button class="button-primary" type="submit">{{ text.create_user }}</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel">
+    <div class="panel-head">
+      <h2>{{ text.user_count_label }}</h2>
+      <span>{{ users|length }} {{ text.members }}</span>
+    </div>
+    <div class="management-list">
+      {% for user in users %}
+      <div class="management-row">
+        <div>
+          <strong>{{ user.name }}</strong>
+          <p>{{ user.email or '-' }} · {{ user_role_labels[user.role.value] }} · {{ user_counts[user.name] }} {{ text["items"] }}</p>
+        </div>
+        <div class="management-actions">
+          <form method="post" action="/users/{{ user.id }}/delete?lang={{ lang }}">
+            <button class="button-danger" type="submit" {% if user_counts[user.name] > 0 %}disabled{% endif %}>{{ text.delete }}</button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <p class="empty">{{ text.empty_users }}</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

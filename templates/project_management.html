@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}{{ text.nav_project_management }} | Pulse{% endblock %}
+{% block content %}
+<section class="hero compact management-hero">
+  <div>
+    <p class="eyebrow">{{ text.nav_project_management }}</p>
+    <h1 class="hero-title">{{ text.project_management_title }}</h1>
+    <p class="lede">{{ text.project_management_subtitle }}</p>
+  </div>
+</section>
+
+<section class="panel-grid management-grid">
+  <article class="panel form-panel-inline">
+    <div class="panel-head">
+      <h2>{{ text.create_project }}</h2>
+      <span>{{ projects|length }} {{ text.projects }}</span>
+    </div>
+    {% if error %}
+    <p class="error-banner">{{ error }}</p>
+    {% endif %}
+    <form class="report-form" method="post" action="/projects/manage?lang={{ lang }}">
+      <label>
+        <span>{{ text.project_name }}</span>
+        <input name="name" value="{{ project_form.get('name', '') }}" required />
+      </label>
+      <label>
+        <span>{{ text.project_owner }}</span>
+        <select name="owner">
+          <option value="">-</option>
+          {% for item in user_options %}
+          <option value="{{ item.name }}" {% if project_form.get('owner', '') == item.name %}selected{% endif %}>{{ item.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="full">
+        <span>{{ text.project_description }}</span>
+        <textarea name="description" rows="5">{{ project_form.get('description', '') }}</textarea>
+      </label>
+      <div class="form-actions full">
+        <button class="button-primary" type="submit">{{ text.create_project }}</button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel">
+    <div class="panel-head">
+      <h2>{{ text.project_count_label }}</h2>
+      <span>{{ projects|length }} {{ text.projects }}</span>
+    </div>
+    <div class="management-list">
+      {% for project in projects %}
+      <div class="management-row">
+        <div class="management-main">
+          <div class="project-title-row">
+            <a class="inline-link" href="/projects/{{ project.name }}?lang={{ lang }}"><strong>{{ project.name }}</strong></a>
+            <span class="status-pill">{{ project_status_labels[project.status.value] }}</span>
+          </div>
+          <p>{{ project.owner or '-' }} · {{ text.project_created_at }}: {{ project.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ project_counts[project.name] }} {{ text["items"] }}</p>
+          <p>{{ text.project_status_changed_at }}: {{ project.status_changed_at.strftime('%Y-%m-%d %H:%M') if project.status_changed_at else '-' }}</p>
+          {% if project.description %}<p>{{ project.description }}</p>{% endif %}
+        </div>
+        <div class="management-actions">
+          <form method="post" action="/projects/{{ project.id }}/status?lang={{ lang }}" class="status-form">
+            <select name="status" class="status-select">
+              {% for item in project_statuses %}
+              <option value="{{ item }}" {% if project.status.value == item %}selected{% endif %}>{{ project_status_labels[item] }}</option>
+              {% endfor %}
+            </select>
+            <button class="button-secondary compact" type="submit">{{ text.update_status }}</button>
+          </form>
+          <a class="button-secondary" href="/projects/{{ project.name }}?lang={{ lang }}">{{ text.manage }}</a>
+          <form method="post" action="/projects/{{ project.id }}/delete?lang={{ lang }}">
+            <button class="button-danger" type="submit" {% if project_counts[project.name] > 0 %}disabled{% endif %}>{{ text.delete }}</button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <p class="empty">{{ text.empty_projects }}</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

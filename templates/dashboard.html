@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}{{ text.nav_dashboard }} | Pulse{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">{{ text.hero_eyebrow }}</p>
+    <h1 class="hero-title">{{ text.hero_title }}</h1>
+    <p class="lede">{{ text.hero_lede }}</p>
+  </div>
+  <a class="button-primary" href="/activities/new?lang={{ lang }}">{{ text.create_report }}</a>
+</section>
+
+<section class="stats-grid">
+  <article class="stat-card">
+    <span>{{ text.total_reports }}</span>
+    <strong>{{ summary.totals['all'] }}</strong>
+  </article>
+  <article class="stat-card">
+    <span>{{ text.projects }}</span>
+    <strong>{{ summary.project_count }}</strong>
+  </article>
+  <article class="stat-card">
+    <span>{{ text.members }}</span>
+    <strong>{{ summary.member_count }}</strong>
+  </article>
+  <article class="stat-card accent">
+    <span>{{ text.risk_items }}</span>
+    <strong>{{ summary.risk_count }}</strong>
+  </article>
+</section>
+
+<section class="panel-grid">
+  <article class="panel">
+    <div class="panel-head">
+      <h2>{{ text.project_overview }}</h2>
+      <span>{{ text.recent_projects_window }}</span>
+    </div>
+    <div class="table-like">
+      {% for project in display_projects %}
+      <a class="row-link" href="/projects/{{ project.project }}?lang={{ lang }}">
+        <div>
+          <strong>{{ project.project }}</strong>
+          <p>{{ project.members | join(', ') }}</p>
+        </div>
+        <div class="row-metrics">
+          <span class="badge">{{ project.total }} {{ text["items"] }}</span>
+          <span class="badge warn">{{ project.risk_count }} {{ text.risks }}</span>
+          <span class="badge danger">{{ project.blocked }} {{ text.blocked }}</span>
+          <span class="progress">{{ project.avg_progress }}%</span>
+        </div>
+      </a>
+      {% else %}
+      <p class="empty">{{ text.no_recent_projects }}</p>
+      {% endfor %}
+    </div>
+    {% if has_more_projects %}
+    <div class="panel-foot">
+      <a class="button-secondary" href="/projects/manage?lang={{ lang }}">{{ text.view_more_projects }}</a>
+    </div>
+    {% endif %}
+  </article>
+
+  <article class="panel">
+    <div class="panel-head">
+      <h2>{{ text.status_snapshot }}</h2>
+      <span>{{ text.live_counts }}</span>
+    </div>
+    <div class="status-grid">
+      {% for key, label in status_labels.items() %}
+      <div class="status-card {{ key }}">
+        <span>{{ label }}</span>
+        <strong>{{ summary.totals[key] }}</strong>
+      </div>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="panel-grid bottom-grid">
+  <article class="panel">
+    <div class="panel-head">
+      <h2>{{ text.team_activity }}</h2>
+      <span>{{ text.recent_members_window }}</span>
+    </div>
+    <div class="member-list">
+      {% for member in display_members %}
+      <div class="member-card">
+        <strong>{{ member.member }}</strong>
+        <span>{{ member.report_count }} {{ text.updates }}</span>
+        <p>{{ member.active_projects | join(', ') }}</p>
+      </div>
+      {% else %}
+      <p class="empty">{{ text.no_recent_members }}</p>
+      {% endfor %}
+    </div>
+    {% if has_more_members %}
+    <div class="panel-foot">
+      <a class="button-secondary" href="/users/manage?lang={{ lang }}">{{ text.view_more_members }}</a>
+    </div>
+    {% endif %}
+  </article>
+
+  <article class="panel">
+    <div class="panel-head">
+      <h2>{{ text.recent_updates }}</h2>
+      <span>{{ text.recent_activities_window }}</span>
+    </div>
+    <div class="timeline">
+      {% for report in display_recent_reports %}
+      <div class="timeline-item">
+        <div>
+          <strong>{{ report.title }}</strong>
+          <p>{{ report.project }} · {{ report.member }}</p>
+        </div>
+        <div class="timeline-meta">
+          <span class="badge">{{ status_labels[report.status.value] }}</span>
+          <span>{{ report.report_date }}</span>
+        </div>
+      </div>
+      {% else %}
+      <p class="empty">{{ text.no_recent_activities }}</p>
+      {% endfor %}
+    </div>
+    {% if has_more_recent_reports %}
+    <div class="panel-foot">
+      <a class="button-secondary" href="/activities/manage?lang={{ lang }}">{{ text.view_more_activities }}</a>
+    </div>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

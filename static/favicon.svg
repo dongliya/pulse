@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="pulseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d77a2f" />
+      <stop offset="100%" stop-color="#8f3f2f" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#f6efe6" />
+  <path
+    d="M12 36h10l5-12 7 22 6-14h12"
+    fill="none"
+    stroke="url(#pulseGradient)"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="5"
+  />
+</svg>

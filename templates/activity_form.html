@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}{{ text.new_report_title }} | Pulse{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">{{ text.back_to_dashboard }}</p>
+    <h1>{{ text.new_report_title }}</h1>
+    <span>{{ text.new_report_subtitle }}</span>
+  </div>
+  <a class="button-secondary" href="/?lang={{ lang }}">{{ text.back_to_dashboard }}</a>
+</section>
+
+<section class="panel form-panel">
+  <form class="report-form" method="post" action="/activities/new?lang={{ lang }}">
+    <label>
+      <span>{{ text.member }}</span>
+      <input name="member" value="{{ form_data.get('member', '') }}" required />
+    </label>
+    <label>
+      <span>{{ text.project }}</span>
+      <input name="project" value="{{ form_data.get('project', '') }}" required />
+    </label>
+    <label class="full">
+      <span>{{ text.title }}</span>
+      <input name="title" value="{{ form_data.get('title', '') }}" required />
+    </label>
+    <label>
+      <span>{{ text.type }}</span>
+      <select name="type">
+        {% for item in types %}
+        <option value="{{ item }}" {% if form_data.get('type') == item %}selected{% endif %}>{{ type_labels[item] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      <span>{{ text.status }}</span>
+      <select name="status">
+        {% for item in statuses %}
+        <option value="{{ item }}" {% if form_data.get('status') == item %}selected{% endif %}>{{ status_labels[item] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="full">
+      <span>{{ text.progress_note }}</span>
+      <textarea name="progress_note" rows="4">{{ form_data.get('progress_note', '') }}</textarea>
+    </label>
+    <label>
+      <span>{{ text.report_date }}</span>
+      <input type="date" name="report_date" value="{{ form_data.get('report_date', today) }}" required />
+    </label>
+    <label class="full">
+      <span>{{ text.risk }}</span>
+      <textarea name="risk" rows="4">{{ form_data.get('risk', '') }}</textarea>
+    </label>
+    <label class="full">
+      <span>{{ text.next_plan }}</span>
+      <textarea name="next_plan" rows="5">{{ form_data.get('next_plan', '') }}</textarea>
+    </label>
+    <div class="form-actions full">
+      <button class="button-primary" type="submit">{{ text.submit_report }}</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

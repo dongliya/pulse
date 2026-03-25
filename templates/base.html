@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Pulse{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/favicon.svg') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+    <header class="shell shell-header">
+      <a class="brand" href="/?lang={{ lang }}">
+        <span>Pulse</span>
+        <small>{{ text.app_subtitle }}</small>
+      </a>
+      <nav>
+        <a href="/?lang={{ lang }}">{{ text.nav_dashboard }}</a>
+        <a href="/projects/manage?lang={{ lang }}">{{ text.nav_project_management }}</a>
+        <a href="/users/manage?lang={{ lang }}">{{ text.nav_user_management }}</a>
+        <a href="/activities/manage?lang={{ lang }}">{{ text.nav_report_management }}</a>
+        <a href="/docs">{{ text.nav_api_docs }}</a>
+        <div class="lang-switch">
+          {% for code, label in languages.items() %}
+          <a class="{% if lang == code %}active{% endif %}" href="{{ request.url.include_query_params(lang=code) }}">{{ label }}</a>
+          {% endfor %}
+        </div>
+      </nav>
+    </header>
+    <main class="shell">{% block content %}{% endblock %}</main>
+  </body>
+</html>

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}{{ summary.project }} | Pulse{% endblock %}
+{% block content %}
+<section class="hero compact">
+  <div>
+    <p class="eyebrow">{{ text.project_detail }}</p>
+    <h1>{{ summary.project }}</h1>
+    <p class="lede">{{ summary.total }} {{ text.updates_count }} · {{ summary.avg_progress }}% {{ text.average_progress }} · {{ summary.risk_count }} {{ text.risks }}</p>
+  </div>
+  <a class="button-secondary" href="/?lang={{ lang }}">{{ text.back }}</a>
+</section>
+
+<section class="stats-grid project-stats">
+  <article class="stat-card"><span>{{ status_labels["done"] }}</span><strong>{{ summary.done }}</strong></article>
+  <article class="stat-card"><span>{{ status_labels["doing"] }}</span><strong>{{ summary.doing }}</strong></article>
+  <article class="stat-card"><span>{{ status_labels["blocked"] }}</span><strong>{{ summary.blocked }}</strong></article>
+  <article class="stat-card"><span>{{ status_labels["todo"] }}</span><strong>{{ summary.todo }}</strong></article>
+</section>
+
+<section class="panel project-visuals">
+  <div class="panel-head">
+    <h2>{{ text.project_unified_timeline }}</h2>
+    <span>{{ text.time_axis }}</span>
+  </div>
+  {% if project_gantt_chart.has_data %}
+  <div class="gantt-chart">
+    <div class="chart-legend">
+      <span><i class="legend-project"></i>{{ text.avg_project_progress }}</span>
+      <span><i class="legend-dot todo"></i>{{ status_labels["todo"] }}</span>
+      <span><i class="legend-dot doing"></i>{{ status_labels["doing"] }}</span>
+      <span><i class="legend-dot blocked"></i>{{ status_labels["blocked"] }}</span>
+      <span><i class="legend-dot done"></i>{{ status_labels["done"] }}</span>
+    </div>
+
+    <div class="gantt-board">
+      <div class="timeline-head">
+        <span></span>
+        <div class="gantt-scale">
+          {% for label in project_gantt_chart.date_labels %}
+          <span style="left: {{ label.left }}%;">{{ label.date }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="gantt-row project-row">
+        <div class="timeline-row-meta project-meta">
+          <strong>{{ summary.project }}</strong>
+          <span>{{ text.project_status }} · {{ summary.avg_progress }}%</span>
+        </div>
+        <div class="gantt-track">
+          {% for segment in project_gantt_chart.project_segments %}
+          <span class="gantt-bar project {{ segment.status }}" style="left: {{ segment.start }}%; width: {{ segment.width }}%;" title="{{ segment.date }} · {{ project_status_labels[segment.status] }} · {{ segment.progress }}%">
+            {{ project_status_labels[segment.status] }}
+          </span>
+          {% endfor %}
+          {% for point in project_gantt_chart.project_milestones %}
+          <span class="gantt-milestone project" style="left: {{ point.left }}%;" title="{{ point.date }} · {{ point.progress }}%">{{ point.progress }}%</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% for row in project_gantt_chart.activity_rows %}
+      <div class="gantt-row">
+        <div class="timeline-row-meta activity-meta">
+          <strong>{{ row.title }}</strong>
+          <span>{{ row.member }}{% if row.type %} · {{ type_labels[row.type] }}{% endif %}</span>
+        </div>
+        <div class="gantt-track">
+          {% for segment in row.segments %}
+          <span class="gantt-bar {{ segment.status }}" style="left: {{ segment.start }}%; width: {{ segment.width }}%;" title="{{ segment.date }} · {{ status_labels[segment.status] }} · {{ segment.progress }}%">
+            {{ status_labels[segment.status] }}
+          </span>
+          {% endfor %}
+          {% for point in row.milestones %}
+          <span class="gantt-milestone {{ point.status }}" style="left: {{ point.left }}%;" title="{{ point.date }} · {{ status_labels[point.status] }} · {{ point.progress }}%{% if point.note %} · {{ point.note }}{% endif %}">
+            {{ point.progress }}%
+          </span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <p class="empty">{{ text.empty_reports }}</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>{{ text.report_items }}</h2>
+    <span>{{ summary.members | join(', ') }}</span>
+  </div>
+  <div class="timeline">
+    {% for report in reports %}
+    <div class="timeline-item stacked">
+      <div>
+        <strong>{{ report.title }}</strong>
+        <p>{{ report.member }} · {{ type_labels[report.type.value] }} · {{ status_labels[report.status.value] }} · {{ report.progress }}%</p>
+        {% if report.risk %}<p><strong>{{ text.risk_label }}:</strong> {{ report.risk }}</p>{% endif %}
+        {% if report.next_plan %}<p><strong>{{ text.next_label }}:</strong> {{ report.next_plan }}</p>{% endif %}
+      </div>
+      <div class="timeline-meta">
+        <span>{{ report.report_date }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
